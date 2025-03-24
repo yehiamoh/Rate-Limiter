@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	//perclient "github.com/yehiamoh/rate-limiter/per-client"
-	tokenbucket "github.com/yehiamoh/rate-limiter/token-bucket"
+	//perclient "github.com/yehiamoh/Rate-Limiter/per-client"
+	tokenbucket "github.com/yehiamoh/Rate-Limiter/token-bucket"
 )
 
 type Message struct {

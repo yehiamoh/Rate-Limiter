@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	tokenbucket "github.com/yehiamoh/rate-limiter/token-bucket"
+	tokenbucket "github.com/yehiamoh/Rate-Limiter/token-bucket"
 )
 
 // PerClientRateLimiter manages rate limiting for multiple clients.

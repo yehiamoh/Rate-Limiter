@@ -1,3 +1,3 @@
-module github.com/yehiamoh/rate-limiter
+module github.com/yehiamoh/Rate-Limiter
 
 go 1.24.1
