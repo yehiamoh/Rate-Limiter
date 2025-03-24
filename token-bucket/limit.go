@@ -6,19 +6,19 @@ import (
 )
 
 type TokenBucket struct {
-	capacity    int
-	tokens      int
-	refilleRate time.Duration
-	lastRefill  time.Time
-	mu          sync.Mutex
+	capacity   int
+	tokens     int
+	refillRate time.Duration
+	lastRefill time.Time
+	mu         sync.Mutex
 }
 
 func NewTokenBucket(capacity int, refillRate time.Duration) *TokenBucket {
 	return &TokenBucket{
-		capacity:    capacity,
-		tokens:      capacity,
-		lastRefill:  time.Now(),
-		refilleRate: refillRate,
+		capacity:   capacity,
+		tokens:     capacity,
+		lastRefill: time.Now(),
+		refillRate: refillRate,
 	}
 }
 
@@ -33,7 +33,14 @@ func (tokenBucket *TokenBucket) IsAllow() bool {
 	elapsed := now.Sub(tokenBucket.lastRefill)
 
 	// Add tokens to the bucket based on the elapsed time and refill rate.
-	tokenBucket.tokens += int(elapsed / tokenBucket.refilleRate)
+	if elapsed > 0 {
+		tokensToAdd := int(elapsed / tokenBucket.refillRate)
+		// Safeguard: Ensure tokensToAdd does not exceed the bucket's capacity.
+		if tokensToAdd > tokenBucket.capacity {
+			tokensToAdd = tokenBucket.capacity
+		}
+		tokenBucket.tokens += tokensToAdd
+	}
 
 	// Ensure the number of tokens does not exceed the bucket's capacity.
 	if tokenBucket.tokens > tokenBucket.capacity {
