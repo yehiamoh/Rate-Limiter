@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	//perclient "github.com/yehiamoh/rate-limiter/per-client"
 	tokenbucket "github.com/yehiamoh/rate-limiter/token-bucket"
 )
 
@@ -18,9 +19,12 @@ func newMessage(status string, resBody string) *Message {
 	return &Message{Status: status, Body: resBody}
 }
 
+// var perClientLimiter = perclient.NewPerClientLimiter(5, 1*time.Second)
 var tokenBucketlimiter = tokenbucket.NewTokenBucket(5, 1*time.Second)
 
 func endpointHandler(w http.ResponseWriter, r *http.Request) {
+	// clientID:=r.RemoteAddr
+	// if !perClientLimiter.IsAllow(clientID)
 	if !tokenBucketlimiter.IsAllow() {
 		http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
 		return
