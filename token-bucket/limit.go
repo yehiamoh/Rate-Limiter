@@ -39,15 +39,12 @@ func (tokenBucket *TokenBucket) IsAllow() bool {
 		if tokensToAdd > tokenBucket.capacity {
 			tokensToAdd = tokenBucket.capacity
 		}
-		tokenBucket.tokens += tokensToAdd
+		if tokensToAdd > 0 {
+			tokenBucket.tokens += tokensToAdd
+			// Only update lastRefill when we actually add tokens to the bucket.
+			tokenBucket.lastRefill = now
+		}
 	}
-
-	// Ensure the number of tokens does not exceed the bucket's capacity.
-	if tokenBucket.tokens > tokenBucket.capacity {
-		tokenBucket.tokens = tokenBucket.capacity
-	}
-	// Update the last refill time to the current time.
-	tokenBucket.lastRefill = now
 
 	// Check if there are tokens available in the bucket.
 	if tokenBucket.tokens > 0 {
