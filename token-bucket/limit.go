@@ -14,6 +14,9 @@ type TokenBucket struct {
 }
 
 func NewTokenBucket(capacity int, refillRate time.Duration) *TokenBucket {
+	if (capacity <= 0) || (refillRate <= 0) {
+		panic("capacity and refillRate must be positive")
+	}
 	return &TokenBucket{
 		capacity:   capacity,
 		tokens:     capacity,
@@ -32,18 +35,12 @@ func (tokenBucket *TokenBucket) IsAllow() bool {
 	// Calculate the time elapsed since the last refill.
 	elapsed := now.Sub(tokenBucket.lastRefill)
 
-	// Add tokens to the bucket based on the elapsed time and refill rate.
-	if elapsed > 0 {
-		tokensToAdd := int(elapsed / tokenBucket.refillRate)
-		// Safeguard: Ensure tokensToAdd does not exceed the bucket's capacity.
-		if tokensToAdd > tokenBucket.capacity {
-			tokensToAdd = tokenBucket.capacity
-		}
-		if tokensToAdd > 0 {
-			tokenBucket.tokens += tokensToAdd
-			// Only update lastRefill when we actually add tokens to the bucket.
-			tokenBucket.lastRefill = now
-		}
+	tokensToAdd := min(int(elapsed.Nanoseconds()/tokenBucket.refillRate.Nanoseconds()), tokenBucket.capacity)
+
+	if tokensToAdd > 0 {
+		tokenBucket.tokens += tokensToAdd
+		// Only update lastRefill when we actually add tokens to the bucket.
+		tokenBucket.lastRefill = now
 	}
 
 	// Check if there are tokens available in the bucket.
