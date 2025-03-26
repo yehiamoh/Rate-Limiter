@@ -44,17 +44,20 @@ import (
 
 func main() {
     // Create a token bucket with a capacity of 10 tokens and a refill rate of 1 token per second.
-    limiter := tokenbucket.NewTokenBucket(10, 1*time.Second)
-    
+    limiter, err := tokenbucket.NewTokenBucket(10, 1*time.Second)
+    if err != nil {
+        panic(err)
+    }
+
     http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-        if !limiter.IsAllow() {
+        if !limiter.IsAllowed() {
             http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
             return
         }
         // Handler logic
         w.Write([]byte("Request successful"))
     })
-    
+
     http.ListenAndServe(":8080", nil)
 }
 ```
@@ -77,17 +80,17 @@ import (
 func main() {
     // Create a per-client rate limiter with a capacity of 5 tokens and a refill rate of 1 token every 2 seconds.
     limiter := perclient.NewPerClientLimiter(5, 2*time.Second)
-    
+
     http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
         clientID := r.RemoteAddr // Use the client's IP address as the unique identifier.
-        if !limiter.IsAllow(clientID) {
+        if !limiter.IsAllowed(clientID) {
             http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
             return
         }
         // Handler logic
         w.Write([]byte("Request successful"))
     })
-    
+
     http.ListenAndServe(":8080", nil)
 }
 ```
@@ -107,8 +110,8 @@ To test the rate limiter, follow these steps:
 2. Test the rate limits using `curl`:
 
    ```bash
-   # Send 6 requests to the /ping endpoint
-   for i in {1..6}; do curl http://localhost:8080/ping; done
+   # Send 6 requests to the /api endpoint
+   for i in {1..6}; do curl http://localhost:8080/api; done
    ```
 
    - The first few requests will succeed.
