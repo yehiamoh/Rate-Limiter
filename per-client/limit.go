@@ -26,7 +26,10 @@ func NewPerClientLimiter(capacity int, refillRate time.Duration) *PerClientRateL
 func (perClientRateLimiter *PerClientRateLimiter) GetBuckets(clientID string) *tokenbucket.TokenBucket {
 	bucket, ok := perClientRateLimiter.buckets.Load(clientID)
 	if !ok {
-		newBucket := tokenbucket.NewTokenBucket(perClientRateLimiter.capacity, perClientRateLimiter.refillRate)
+		newBucket, err := tokenbucket.NewTokenBucket(perClientRateLimiter.capacity, perClientRateLimiter.refillRate)
+		if err != nil {
+			return nil
+		}
 		perClientRateLimiter.buckets.Store(clientID, newBucket)
 		return newBucket
 	}
@@ -36,5 +39,5 @@ func (perClientRateLimiter *PerClientRateLimiter) GetBuckets(clientID string) *t
 // IsAllow checks if a request from a client is allowed.
 func (perClientRateLimiter *PerClientRateLimiter) IsAllow(clientID string) bool {
 	bucket := perClientRateLimiter.GetBuckets(clientID)
-	return bucket.IsAllow()
+	return bucket.IsAllowed()
 }
